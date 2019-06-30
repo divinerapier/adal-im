@@ -1,2 +1,9 @@
 /target
 **/*.rs.bk
+
+# idea
+.idea
+.vscode
+
+# temp
+.DS_stroe
