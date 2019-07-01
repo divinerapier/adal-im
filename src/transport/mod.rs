@@ -5,14 +5,15 @@ use std::io::Read;
 use std::net::SocketAddr as StdSocketAddr;
 use std::net::TcpStream as StdTcpStream;
 
-pub struct Connection {
-    stream: StdTcpStream,
+pub struct TCPConnection {
+    pub stream: StdTcpStream,
     pub remote_addr: StdSocketAddr,
 }
 
-impl Connection {
-    pub fn new(c: StdTcpStream, remote_addr: StdSocketAddr) -> Connection {
-        Connection {
+#[allow(dead_code)]
+impl TCPConnection {
+    pub fn new(c: StdTcpStream, remote_addr: StdSocketAddr) -> TCPConnection {
+        TCPConnection {
             stream: c,
             remote_addr,
         }
@@ -64,9 +65,9 @@ impl Connection {
     }
 }
 
-impl From<(StdTcpStream, StdSocketAddr)> for Connection {
-    fn from(conn: (StdTcpStream, StdSocketAddr)) -> Connection {
-        Connection {
+impl From<(StdTcpStream, StdSocketAddr)> for TCPConnection {
+    fn from(conn: (StdTcpStream, StdSocketAddr)) -> TCPConnection {
+        TCPConnection {
             stream: conn.0,
             remote_addr: conn.1,
         }

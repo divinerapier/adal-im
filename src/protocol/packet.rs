@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use super::Error;
 use super::MessageType;
+use super::TCPConnection;
+use super::BinaryProtocol;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Packet {
@@ -11,6 +13,7 @@ pub struct Packet {
     pub message: String,
 }
 
+#[allow(dead_code)]
 impl Packet {
     pub fn new(user: u64, message_type: MessageType, message: &str) -> Packet {
         Packet {
@@ -35,5 +38,20 @@ impl std::fmt::Display for Packet {
             "length: {}, user: {}, type: {}, message: {}",
             self.total_length, self.user, self.message_type, self.message
         )
+    }
+}
+
+#[allow(dead_code)]
+pub struct Context {
+    pub prot: BinaryProtocol,
+    pub packet: Packet,
+}
+
+impl Context {
+    pub fn new(prot: BinaryProtocol, packet: Packet) -> Context {
+        Context {
+            prot,
+            packet,
+        }
     }
 }

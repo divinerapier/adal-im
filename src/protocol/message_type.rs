@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 /// 消息类型
 #[derive(Copy, Clone, Hash, Eq, PartialEq, Debug)]
+#[allow(dead_code)]
 pub enum MessageType {
     /// 私聊文本消息
     PrivateTextMessage = 0,
