@@ -1,20 +1,24 @@
 use crate::error::Error;
-use crate::transport::Connection;
+use crate::protocol::BinaryProtocol;
 pub struct Server {}
 
 pub struct ServerBuilder {}
 
 impl Server {
-    fn run(&self) -> Result<(), Error> {
+    pub fn run(&self) -> Result<(), Error> {
         let ln = std::net::TcpListener::bind("0.0.0.0:6810")?;
         loop {
             let conn = ln.accept()?;
-            let conn: Connection = From::from(conn);
-            std::thread::spawn(move || {
-                let _c = conn;
+            println!("accept a new connection. {}", conn.1);
+            let mut protocol: BinaryProtocol = BinaryProtocol::new(From::from(conn));
+            std::thread::spawn(move || loop {
+                let packet = protocol.read_packet();
+                println!(
+                    "remote: {}, packet: {}",
+                    protocol.transport.remote_addr, packet
+                );
             });
         }
-        unreachable!();
     }
 }
 
