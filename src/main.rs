@@ -1,6 +1,7 @@
 mod error;
 mod protocol;
 mod server;
+mod service;
 mod transport;
 
 fn main() {

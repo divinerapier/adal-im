@@ -1,6 +1,14 @@
 use crate::error::Error;
 use crate::protocol::BinaryProtocol;
+use crate::service::Service;
+
 pub struct Server {}
+
+impl Server {
+    fn register_service(&mut self, svc: &dyn Service) {
+        svc.register(self);
+    }
+}
 
 pub struct ServerBuilder {}
 

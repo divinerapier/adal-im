@@ -24,20 +24,6 @@ impl Connection {
         Ok(buffer[0])
     }
 
-    //     pub fn read_builtin<T>(&mut self) -> Result<T, Error> {
-    // let size =        std::mem::size_of::<T>();
-    // let mut buffer : Vec<u8> = Vec::new();
-    // buffer.resize(size, 0);
-    // self.stream.read_exact(&mut buffer)?;
-    // match size {
-    // 1 => Ok(buffer[0]),
-    // 2 => Ok(byteorder::LittleEndian::read_u16(&mut buffer)),
-    // 4 => Ok(byteorder::LittleEndian::read_u32(&mut buffer) ),
-    // 8 => Ok(byteorder::LittleEndian::read_u64(&mut buffer) ),
-    // _ => Err(Error{}),
-    //     }
-    //     }
-
     pub fn read_u16(&mut self) -> Result<u16, Error> {
         let mut buffer: [u8; 2] = [0; 2];
         self.stream.read_exact(&mut buffer)?;
