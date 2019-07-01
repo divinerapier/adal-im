@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+use super::BinaryProtocol;
 use super::Error;
 use super::MessageType;
 use super::TCPConnection;
-use super::BinaryProtocol;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Packet {
@@ -49,9 +49,6 @@ pub struct Context {
 
 impl Context {
     pub fn new(prot: BinaryProtocol, packet: Packet) -> Context {
-        Context {
-            prot,
-            packet,
-        }
+        Context { prot, packet }
     }
 }
