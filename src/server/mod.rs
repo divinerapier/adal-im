@@ -1,8 +1,12 @@
 use crate::error::Error;
 use crate::protocol::BinaryProtocol;
+use crate::protocol::MessageType;
 use crate::service::Service;
+use std::collections::HashMap;
 
-pub struct Server {}
+pub struct Server {
+    router: HashMap<MessageType, Box<Service>>,
+}
 
 impl Server {
     fn register_service(&mut self, svc: &dyn Service) {
@@ -19,6 +23,7 @@ impl Server {
             let conn = ln.accept()?;
             println!("accept a new connection. {}", conn.1);
             let mut protocol: BinaryProtocol = BinaryProtocol::new(From::from(conn));
+            let router = self.router.
             std::thread::spawn(move || loop {
                 let packet = protocol.read_packet();
                 println!(
@@ -36,6 +41,8 @@ impl ServerBuilder {
     }
 
     pub fn build(self) -> Server {
-        Server {}
+        Server {
+            router: HashMap::new(),
+        }
     }
 }
