@@ -1,7 +1,6 @@
-use crate::protocol::{Context, MessageType, Packet};
+use crate::protocol::Context;
 
 pub type Handler = fn(Context) -> Context;
-
 
 // pub trait ServiceFactory<I> {
 //     fn service_type(&self) -> MessageType;
@@ -84,4 +83,3 @@ pub type Handler = fn(Context) -> Context;
 //         self(input)
 //     }
 // }
-

@@ -1,26 +1,24 @@
 use crate::error::Error;
 use crate::protocol::{BinaryProtocol, Context, MessageType, Packet};
 use crate::service::Handler;
-use crate::transport::TCPConnection;
 
 use std::collections::HashMap;
-use std::sync::Arc;
-use std::sync::Mutex;
+use std::sync::{Arc, RwLock};
 
 #[allow(dead_code)]
 pub struct Server {
-    services: Arc<Mutex<HashMap<MessageType, Handler>>>,
+    services: Arc<RwLock<HashMap<MessageType, Handler>>>,
 }
 
 impl Server {
     pub fn new() -> Server {
         Server {
-            services: Arc::new(Mutex::new(HashMap::new())),
+            services: Arc::new(RwLock::new(HashMap::new())),
         }
     }
     pub fn add(self, message_type: MessageType, handler: Handler) -> Server {
         let map = self.services.clone();
-        let mut map = map.lock().unwrap();
+        let mut map = map.write().unwrap();
         map.insert(message_type, handler);
         self
     }
@@ -37,18 +35,28 @@ impl Server {
     fn handle(&self, mut prot: BinaryProtocol) {
         let services = self.services.clone();
         std::thread::spawn(move || loop {
-            let packet = prot.read_packet();
+            let packet = match prot.read_packet() {
+                Ok(p) => p,
+                Err(e) => {
+                    println!("failed to read packet. error: {} ", e);
+                    if e.is_eof() {
+                        println!("eof");
+                        return;
+                    }
+                    continue;
+                }
+            };
             let conn = prot.try_clone();
             Self::dispatch(services.clone(), conn, packet);
         });
     }
 
     fn dispatch(
-        router: Arc<Mutex<HashMap<MessageType, Handler>>>,
+        router: Arc<RwLock<HashMap<MessageType, Handler>>>,
         conn: BinaryProtocol,
         packet: Packet,
     ) {
-        let router = router.lock().unwrap();
+        let router = router.read().unwrap();
         if !router.contains_key(&packet.message_type) {
             println!("not found message type. {}", packet);
             return;

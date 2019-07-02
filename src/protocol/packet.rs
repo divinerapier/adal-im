@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use super::BinaryProtocol;
 use super::Error;
 use super::MessageType;
-use super::TCPConnection;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Packet {

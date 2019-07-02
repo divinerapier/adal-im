@@ -9,10 +9,15 @@ fn handler1(mut ctx: protocol::Context) -> protocol::Context {
         "remote: {}, type: {}, message: {}",
         ctx.prot.transport.remote_addr, ctx.packet.message_type, ctx.packet.message
     );
-    ctx.prot.write_packet(
+    match ctx.prot.write_packet(
         ctx.packet.message_type,
         &format!("handler1. nihao. {}", ctx.prot.transport.remote_addr),
-    );
+    ) {
+        Ok(_) => {}
+        Err(e) => {
+            println!("failed to reply. error: {}", e);
+        }
+    }
     ctx
 }
 
@@ -21,10 +26,15 @@ fn handler2(mut ctx: protocol::Context) -> protocol::Context {
         "remote: {}, type: {}, message: {}",
         ctx.prot.transport.remote_addr, ctx.packet.message_type, ctx.packet.message
     );
-    ctx.prot.write_packet(
+    match ctx.prot.write_packet(
         ctx.packet.message_type,
         &format!("handler2. nihao. {}", ctx.prot.transport.remote_addr),
-    );
+    ) {
+        Ok(_) => {}
+        Err(e) => {
+            println!("failed to reply. error: {}", e);
+        }
+    }
     ctx
 }
 
