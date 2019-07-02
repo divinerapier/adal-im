@@ -24,10 +24,10 @@ impl Packet {
         }
     }
     pub fn encode(&self) -> Result<Vec<u8>, Error> {
-        dbg!(Ok(bincode::serialize(&self)?))
+        Ok(bincode::serialize(&self)?)
     }
     pub fn decode(data: &Vec<u8>) -> Result<Packet, Error> {
-        dbg!(Ok(bincode::deserialize(&data)?))
+        Ok(bincode::deserialize(&data)?)
     }
 }
 

@@ -44,7 +44,7 @@ impl TCPConnection {
     }
 
     pub fn read_extract(&mut self, mut buffer: &mut [u8]) -> Result<(), Error> {
-        dbg!(Ok(self.stream.read_exact(&mut buffer)?))
+        Ok(self.stream.read_exact(&mut buffer)?)
     }
 
     pub fn write_u8(&mut self, v: u8) -> Result<(), Error> {

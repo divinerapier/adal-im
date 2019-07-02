@@ -45,16 +45,16 @@ impl<'de> Deserialize<'de> for MessageType {
         let value = i32::deserialize(deserializer)?;
         match value {
             0 => Ok(MessageType::PrivateTextMessage),
-            1 => Ok(MessageType::PrivateTextMessage),
-            2 => Ok(MessageType::PrivateTextMessage),
-            3 => Ok(MessageType::PrivateTextMessage),
-            4 => Ok(MessageType::PrivateTextMessage),
+            1 => Ok(MessageType::PrivateImageMessage),
+            2 => Ok(MessageType::PrivateAudioMessage),
+            3 => Ok(MessageType::PrivateVideoMessage),
+            4 => Ok(MessageType::PrivateFileMessage),
 
-            1000 => Ok(MessageType::PrivateTextMessage),
-            1001 => Ok(MessageType::PrivateTextMessage),
-            1002 => Ok(MessageType::PrivateTextMessage),
-            1003 => Ok(MessageType::PrivateTextMessage),
-            1004 => Ok(MessageType::PrivateTextMessage),
+            1000 => Ok(MessageType::GroupTextMessage),
+            1001 => Ok(MessageType::GroupImageMessage),
+            1002 => Ok(MessageType::GroupAudioMessage),
+            1003 => Ok(MessageType::GroupVideoMessage),
+            1004 => Ok(MessageType::GroupFileMessage),
             _ => Err(serde::de::Error::custom(format!(
                 "unknown message type: {}",
                 value as i32

@@ -10,12 +10,12 @@ impl BinaryProtocol {
     }
 
     pub fn read_packet(&mut self) -> Packet {
-        let length = dbg!(self.transport.read_u32().unwrap());
-        let mut buffer: Vec<u8> = dbg!(Vec::with_capacity(length as usize));
+        let length = self.transport.read_u32().unwrap();
+        let mut buffer: Vec<u8> = Vec::with_capacity(length as usize);
         buffer.resize(length as usize, 0);
-        dbg!(self.transport.read_extract(&mut buffer).unwrap());
-        dbg!(&buffer);
-        dbg!(Packet::decode(&buffer).unwrap())
+        self.transport.read_extract(&mut buffer).unwrap();
+        println!("{:?}", buffer);
+        Packet::decode(&buffer).unwrap()
     }
 
     pub fn write_packet(&mut self, message_type: MessageType, message: &str) {
