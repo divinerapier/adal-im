@@ -1,85 +1,25 @@
-use crate::protocol::Context;
+use crate::protocol::{BinaryProtocol, Context};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::sync::{Arc, RwLock};
 
-pub type Handler = fn(Context) -> Context;
+mod login;
+mod private_text;
 
-// pub trait ServiceFactory<I> {
-//     fn service_type(&self) -> MessageType;
-//     fn serve(&self, ctx:  I);
-// }
+pub use login::login;
+pub use private_text::private_text_message;
 
-// pub struct Service<F, I>
-// where
-//     F: Factory<I>,
-// {
-//     message_type: MessageType,
-//     handler: Option<Box<Handler<F, I>>>,
-// }
+pub enum Handler {
+    H1(Handler1),
+    H2(Handler2),
+}
 
-// impl<F, I> Service<F, I>
-// where
-//     F: Factory<I>,
-// {
-//     pub fn new(message_type: MessageType) -> Service<F, I> {
-//         Service {
-//             message_type,
-//             handler: None,
-//         }
-//     }
+pub type Handler1 = fn(Context) -> Context;
+pub type Handler2 = fn(Context, Arc<RwLock<HashMap<u64, BinaryProtocol>>>) -> Context;
 
-//     pub fn route(mut self, handler: F) -> Service<F, I>
-//     where
-//         F: Factory<I>,
-//     {
-//         self.handler = Some(Box::new(Handler::new(handler)));
-//         self
-//     }
-// }
-
-// impl<F, I> ServiceFactory<I> for Service<F, I>
-// where
-//     F: Factory<I>,
-// {
-//     fn service_type(&self) -> MessageType {
-//         self.message_type
-//     }
-//     fn serve(&self, ctx:  I) {
-// self.handler.unwrap().call(ctx);
-//     }
-// }
-
-// pub struct Handler<F, I>
-// where
-//     F: Factory<I>,
-// {
-//     handler: F,
-//     _t: std::marker::PhantomData<I>,
-// }
-
-// impl<F, I> Handler<F, I>
-// where
-//     F: Factory<I>,
-// {
-//     pub fn new(handler: F) -> Self {
-//         Handler {
-//             handler,
-//             _t: std::marker::PhantomData,
-//         }
-//     }
-
-//     pub fn call(&self,ctx : I) {
-//         self.handler.call(ctx);
-//     }
-// }
-
-// pub trait Factory<I> {
-//      fn call(&self, ctx: I) -> Context;
-// }
-
-// impl<F, I> Factory<I> for F
-// where
-//     F: Fn() -> Context,
-// {
-//     fn call(&self, input: I) -> Context {
-//         self(input)
-//     }
-// }
+#[derive(Serialize, Deserialize)]
+pub struct TextMessage {
+    pub from: u64,
+    pub to: u64,
+    pub message: String,
+}
