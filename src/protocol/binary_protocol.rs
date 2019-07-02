@@ -23,6 +23,9 @@ impl BinaryProtocol {
     pub fn write_packet(&mut self, message_type: MessageType, message: &str) -> Result<(), Error> {
         let packet = Packet::new(0, message_type, message);
         let data = packet.encode()?;
+        self.transport
+            .stream
+            .write(&bincode::serialize::<u32>(&packet.total_length)?)?;
         self.transport.stream.write(&data)?;
         Ok(())
     }
