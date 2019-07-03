@@ -1,3 +1,4 @@
+use crate::data::SyncData;
 use crate::error::Error;
 use crate::protocol::{BinaryProtocol, Context, MessageType, Packet};
 use crate::service::Handler;
@@ -8,14 +9,14 @@ use std::sync::{Arc, RwLock};
 #[allow(dead_code)]
 pub struct Server {
     services: Arc<RwLock<HashMap<MessageType, Handler>>>,
-    data: Arc<RwLock<HashMap<u64, BinaryProtocol>>>,
+    data: SyncData,
 }
 
 impl Server {
     pub fn new() -> Server {
         Server {
             services: Arc::new(RwLock::new(HashMap::new())),
-            data: Arc::new(RwLock::new(HashMap::new())),
+            data: SyncData::new(),
         }
     }
 
@@ -28,7 +29,14 @@ impl Server {
         }
     }
 
-    pub fn run(&self, addr: &str) -> Result<(), Error> {
+    pub fn run(&mut self, addr: &str) -> Result<(), Error> {
+        let parts: Vec<_> = addr.split(':').collect();
+        let mut local_addr = crate::network::local_ip().unwrap();
+        local_addr.push(':');
+        local_addr.push_str(parts[1]);
+        self.data.set_local_addr(&local_addr);
+
+        self.data.sync();
         let ln = std::net::TcpListener::bind(addr)?;
         loop {
             let conn = ln.accept()?;
@@ -60,7 +68,7 @@ impl Server {
 
     fn dispatch(
         services: Arc<RwLock<HashMap<MessageType, Handler>>>,
-        data: Arc<RwLock<HashMap<u64, BinaryProtocol>>>,
+        data: SyncData,
         conn: BinaryProtocol,
         packet: Packet,
     ) {
@@ -74,5 +82,14 @@ impl Server {
             crate::service::Handler::H1(h1) => h1(Context::new(conn, packet)),
             crate::service::Handler::H2(h2) => h2(Context::new(conn, packet), data),
         };
+    }
+}
+
+mod test {
+    #[test]
+    fn foo() {
+        let parts: Vec<_> = "0.0.0.0:6810".split(':').collect();
+        assert!(parts.len() == 2, format!("wrong result! {:?}", parts));
+        assert!(parts[0] == "0.0.0.0", format!("wrong result! {:?}", parts));
     }
 }
