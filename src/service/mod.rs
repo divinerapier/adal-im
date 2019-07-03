@@ -1,13 +1,18 @@
-use crate::protocol::{BinaryProtocol, Context};
+use crate::data::SyncData;
+use crate::protocol::Context;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
 
+mod exchange_route;
+mod keepalive;
 mod login;
 mod private_text;
 
+pub use exchange_route::exchange_route;
+pub use keepalive::keepalive;
 pub use login::login;
 pub use private_text::private_text_message;
+
+pub use crate::protocol::ExchangeRouteMessage;
 
 pub enum Handler {
     H1(Handler1),
@@ -15,7 +20,7 @@ pub enum Handler {
 }
 
 pub type Handler1 = fn(Context) -> Context;
-pub type Handler2 = fn(Context, Arc<RwLock<HashMap<u64, BinaryProtocol>>>) -> Context;
+pub type Handler2 = fn(Context, SyncData) -> Context;
 
 #[derive(Serialize, Deserialize)]
 pub struct TextMessage {
