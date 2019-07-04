@@ -1,19 +1,14 @@
-use crate::protocol::BinaryProtocol;
-use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
+use crate::data::SyncData;
 
-pub fn login(
-    mut ctx: super::Context,
-    data: Arc<RwLock<HashMap<u64, BinaryProtocol>>>,
-) -> super::Context {
+pub fn login(mut ctx: super::Context, mut data: SyncData) -> super::Context {
     println!(
         "login. remote: {}, type: {}, message: {}",
         ctx.prot.transport.remote_addr, ctx.packet.message_type, ctx.packet.message
     );
-    let mut data = data.write().unwrap();
-    data.insert(ctx.packet.user, ctx.prot.try_clone());
+    data.user_login(ctx.packet.user, ctx.prot.try_clone());
     match ctx.prot.write_packet(
-        ctx.packet.message_type,
+        ctx.packet.user,
+        ctx.packet.message_type + 1,
         &format!("user: {}. login successfully!", ctx.packet.user),
     ) {
         Ok(_) => {}
