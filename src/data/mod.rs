@@ -1,8 +1,12 @@
 use crate::protocol::BinaryProtocol;
 
 use std::collections::HashMap;
-
 use std::sync::{Arc, RwLock};
+
+use etcd::kv;
+use futures::future::Future;
+
+use hyper::client::connect::HttpConnector;
 
 pub struct UserData {
     is_local: bool,
@@ -20,6 +24,7 @@ pub struct Data {
     user_client: HashMap<u64, UserData>,
     last_sync_time: u64,
     local_address: String,
+    client: etcd::Client<HttpConnector>,
 }
 
 pub struct SyncData(Arc<RwLock<Data>>);
@@ -31,6 +36,7 @@ impl SyncData {
             user_client: HashMap::new(),
             last_sync_time: Self::now(),
             local_address: crate::network::local_ip().unwrap(),
+            client: etcd::Client::new(&["http://localhost:2379"], None).unwrap(),
         })))
     }
 
@@ -48,6 +54,26 @@ impl SyncData {
             Some(a) => a.is_local,
         }
     }
+
+    fn load_servers_loop(&self) {
+        let data = self.0.clone();
+        std::thread::spawn(move || loop {
+            {
+                let read_data = data.read().unwrap();
+                kv::get(
+                    &read_data.client,
+                    "/adal/servers",
+                    kv::GetOptions::default(),
+                )
+                .and_then(|response| {
+                    let _a = response.data.node.value;
+                    Ok(())
+                });
+            }
+        });
+    }
+
+    fn load_servers(&mut self) {}
 
     fn hack_servers(&mut self) {
         let data = self.0.clone();
