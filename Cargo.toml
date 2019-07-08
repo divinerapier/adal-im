@@ -15,3 +15,6 @@ pnet = "0.22.0"
 etcd = "0.9.0"
 hyper = "0.12.31"
 futures = "0.1.28"
+tokio = "*"
+
+

@@ -1,3 +1,4 @@
+use etcd::Error as EtcdError;
 use std::error::Error as StdError;
 use std::io::Error as StdIOError;
 
@@ -34,6 +35,7 @@ impl std::fmt::Display for ErrorKind {
         match self {
             ErrorKind::BincodeError(e) => write!(f, "bincode: {}", e),
             ErrorKind::StdIOError(e) => write!(f, "stdio: {}", e),
+            ErrorKind::EtcdError(e) => write!(f, "etcd: {}", e),
         }
     }
 }
@@ -42,6 +44,7 @@ impl std::fmt::Display for ErrorKind {
 pub enum ErrorKind {
     BincodeError(bincode::ErrorKind),
     StdIOError(StdIOError),
+    EtcdError(EtcdError),
 }
 
 impl std::convert::From<StdIOError> for Error {
@@ -65,6 +68,7 @@ impl StdError for Error {
         match self.kind {
             ErrorKind::BincodeError(ref e) => e.description(),
             ErrorKind::StdIOError(ref e) => e.description(),
+            ErrorKind::EtcdError(ref e) => e.description(),
         }
     }
 
@@ -72,6 +76,15 @@ impl StdError for Error {
         match self.kind {
             ErrorKind::BincodeError(ref e) => e.source(),
             ErrorKind::StdIOError(ref e) => Some(e),
+            ErrorKind::EtcdError(ref e) => Some(e),
+        }
+    }
+}
+
+impl std::convert::From<etcd::Error> for Error {
+    fn from(e: etcd::Error) -> Error {
+        Error {
+            kind: ErrorKind::EtcdError(e),
         }
     }
 }
