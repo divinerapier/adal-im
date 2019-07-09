@@ -24,7 +24,8 @@ pub struct Data {
     user_client: HashMap<u64, UserData>,
     last_sync_time: u64,
     local_address: String,
-    client: etcd::Client<HttpConnector>,
+    // client: etcd::Client<HttpConnector>,
+    server_manager: crate::server::manager::Manager,
 }
 
 pub struct SyncData(Arc<RwLock<Data>>);
@@ -36,7 +37,8 @@ impl SyncData {
             user_client: HashMap::new(),
             last_sync_time: Self::now(),
             local_address: crate::network::local_ip().unwrap(),
-            client: etcd::Client::new(&["http://localhost:2379"], None).unwrap(),
+            server_manager: crate::server::manager::Manager::new(&["http://localhost:2379"], "")
+                .unwrap(),
         })))
     }
 
@@ -60,15 +62,7 @@ impl SyncData {
         std::thread::spawn(move || loop {
             {
                 let read_data = data.read().unwrap();
-                kv::get(
-                    &read_data.client,
-                    "/adal/servers",
-                    kv::GetOptions::default(),
-                )
-                .and_then(|response| {
-                    let _a = response.data.node.value;
-                    Ok(())
-                });
+                read_data.server_manager.get_servers();
             }
         });
     }
