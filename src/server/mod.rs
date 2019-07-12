@@ -6,6 +6,8 @@ use crate::service::Handler;
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
+pub mod manager;
+
 #[allow(dead_code)]
 pub struct Server {
     services: Arc<RwLock<HashMap<MessageType, Handler>>>,

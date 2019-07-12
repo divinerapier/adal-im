@@ -12,3 +12,9 @@ serde_json = "1.0"
 bincode = "1.1.4"
 byteorder = "1.3.2"
 pnet = "0.22.0"
+etcd = "0.9.0"
+hyper = "0.12.31"
+futures = "0.1.28"
+tokio = "0.1.22"
+
+

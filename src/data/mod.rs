@@ -1,8 +1,12 @@
 use crate::protocol::BinaryProtocol;
 
 use std::collections::HashMap;
-
 use std::sync::{Arc, RwLock};
+
+use etcd::kv;
+use futures::future::Future;
+
+use hyper::client::connect::HttpConnector;
 
 pub struct UserData {
     is_local: bool,
@@ -20,6 +24,8 @@ pub struct Data {
     user_client: HashMap<u64, UserData>,
     last_sync_time: u64,
     local_address: String,
+    // client: etcd::Client<HttpConnector>,
+    server_manager: crate::server::manager::Manager,
 }
 
 pub struct SyncData(Arc<RwLock<Data>>);
@@ -31,6 +37,8 @@ impl SyncData {
             user_client: HashMap::new(),
             last_sync_time: Self::now(),
             local_address: crate::network::local_ip().unwrap(),
+            server_manager: crate::server::manager::Manager::new(&["http://localhost:2379"], "")
+                .unwrap(),
         })))
     }
 
@@ -48,6 +56,18 @@ impl SyncData {
             Some(a) => a.is_local,
         }
     }
+
+    fn load_servers_loop(&self) {
+        let data = self.0.clone();
+        std::thread::spawn(move || loop {
+            {
+                let read_data = data.read().unwrap();
+                read_data.server_manager.get_servers();
+            }
+        });
+    }
+
+    fn load_servers(&mut self) {}
 
     fn hack_servers(&mut self) {
         let data = self.0.clone();
