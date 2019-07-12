@@ -1,5 +1,6 @@
 mod data;
 mod error;
+mod etcdcli;
 mod network;
 mod protocol;
 mod server;

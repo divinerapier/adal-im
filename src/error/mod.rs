@@ -1,10 +1,31 @@
-use etcd::Error as EtcdError;
 use std::error::Error as StdError;
 use std::io::Error as StdIOError;
 
 #[derive(Debug)]
 pub struct Error {
     kind: ErrorKind,
+}
+
+#[derive(Debug)]
+pub enum EtcdError {
+    Unexpected(String),
+}
+
+impl std::fmt::Display for EtcdError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "")
+    }
+}
+
+impl std::error::Error for EtcdError {}
+
+impl From<String> for EtcdError {
+    fn from(s: String) -> EtcdError {
+        if s.eq("") {
+            return EtcdError::Unexpected(s);
+        }
+        return EtcdError::Unexpected(s);
+    }
 }
 
 impl Error {
@@ -47,7 +68,7 @@ pub enum ErrorKind {
     EtcdError(EtcdError),
 }
 
-impl std::convert::From<StdIOError> for Error {
+impl From<StdIOError> for Error {
     fn from(e: StdIOError) -> Error {
         Error {
             kind: ErrorKind::StdIOError(e),
@@ -55,7 +76,7 @@ impl std::convert::From<StdIOError> for Error {
     }
 }
 
-impl std::convert::From<Box<bincode::ErrorKind>> for Error {
+impl From<Box<bincode::ErrorKind>> for Error {
     fn from(e: Box<bincode::ErrorKind>) -> Error {
         Error {
             kind: ErrorKind::BincodeError(*e),
@@ -81,10 +102,26 @@ impl StdError for Error {
     }
 }
 
-impl std::convert::From<etcd::Error> for Error {
+impl From<etcd::Error> for Error {
     fn from(e: etcd::Error) -> Error {
-        Error {
-            kind: ErrorKind::EtcdError(e),
+        match e {
+            etcd::Error::Api(e) => Error {
+                kind: ErrorKind::EtcdError(EtcdError::from(e.message)),
+            },
+            default_e @ _ => Error {
+                kind: ErrorKind::EtcdError(EtcdError::Unexpected(format!("{:?}", default_e))),
+            },
         }
+    }
+}
+
+impl From<Vec<etcd::Error>> for Error {
+    fn from(err: Vec<etcd::Error>) -> Error {
+        for e in err {
+            return Error::from(e);
+        }
+        return Error {
+            kind: ErrorKind::EtcdError(EtcdError::Unexpected(format!("empty errors vector"))),
+        };
     }
 }
