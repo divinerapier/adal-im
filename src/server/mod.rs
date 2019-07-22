@@ -37,7 +37,6 @@ impl Server {
         local_addr.push(':');
         local_addr.push_str(parts[1]);
         self.data.set_local_addr(&local_addr);
-
         self.data.sync();
         let ln = std::net::TcpListener::bind(addr)?;
         loop {

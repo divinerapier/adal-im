@@ -24,8 +24,7 @@ pub struct Data {
     user_client: HashMap<u64, UserData>,
     last_sync_time: u64,
     local_address: String,
-    // client: etcd::Client<HttpConnector>,
-    server_manager: crate::server::manager::Manager,
+    server_manager: Option<crate::server::manager::Manager>,
 }
 
 pub struct SyncData(Arc<RwLock<Data>>);
@@ -37,8 +36,7 @@ impl SyncData {
             user_client: HashMap::new(),
             last_sync_time: Self::now(),
             local_address: crate::network::local_ip().unwrap(),
-            server_manager: crate::server::manager::Manager::new(&["http://localhost:2379"], "")
-                .unwrap(),
+            server_manager: None,
         })))
     }
 
@@ -62,7 +60,7 @@ impl SyncData {
         std::thread::spawn(move || loop {
             {
                 let read_data = data.read().unwrap();
-                read_data.server_manager.get_servers();
+                read_data.server_manager.as_ref().unwrap().get_servers();
             }
         });
     }
@@ -154,6 +152,9 @@ impl SyncData {
         let data = self.0.clone();
         let mut data = data.write().unwrap();
         data.local_address = local_addr.to_owned();
+        data.server_manager = Some(
+            crate::server::manager::Manager::new(&["http://localhost:2379"], local_addr).unwrap(),
+        );
     }
 
     pub fn get_user_connection(&self, user: u64) -> Option<BinaryProtocol> {
